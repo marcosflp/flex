@@ -3,7 +3,7 @@ Application that manage torrents downloads
 
 ## Requirements
 * Python >= 3.5
-* Libtorrent
+* Libtorrent == 1.1.3
 
 #### Install libtorrent
 > reference http://www.libtorrent.org/python_binding.html
