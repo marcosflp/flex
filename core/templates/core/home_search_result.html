@@ -1,0 +1,9 @@
+{% for item in context.data %}
+  <div class="item">
+    <div class="right floated content">
+      <a href="/addtorrent?{{ item.link }}"><div class="ui button">Add</div></a>
+    </div>
+    <img class="ui avatar image" src="">
+    <div class="content">{{ item.title }} - {{ item.size }}</div>
+  </div>
+{% endfor %}

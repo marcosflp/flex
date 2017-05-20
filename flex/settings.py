@@ -117,3 +117,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, STATIC_URL[1:])
+
+
+# Download root folder
+ROOT_DOWNLOAD_FOLDER = '~/Movies'
