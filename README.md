@@ -11,13 +11,13 @@ Application that manage torrents downloads
 > remember to active your virtualenv
 
 ```bash
-cd /tmp/
-wget https://github.com/arvidn/libtorrent/releases/download/libtorrent-1_1_3/libtorrent-rasterbar-1.1.3.tar.gz
-tar xzf libtorrent-rasterbar-1.1.3.tar.gz
-cd libtorrent-rasterbar-1.1.3/
-./configure --enable-debug=yes --with-boost-python=lib --enable-python-binding
-python setup.py build
-python setup.py install
+$ cd /tmp/
+$ wget https://github.com/arvidn/libtorrent/releases/download/libtorrent-1_1_3/libtorrent-rasterbar-1.1.3.tar.gz
+$ tar xzf libtorrent-rasterbar-1.1.3.tar.gz
+$ cd libtorrent-rasterbar-1.1.3/
+$ ./configure --enable-debug=yes --with-boost-python=lib --enable-python-binding
+$ python setup.py build
+$ python setup.py install
 ```
 
 
