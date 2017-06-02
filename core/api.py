@@ -34,13 +34,10 @@ class ThePirateBayApi(object):
         query = "{0}/{1}/{2}/{3}/".format(title, str(paginator_index), self.order_by['seeders'], self.category['video'])
         url = self.thepiratebay_search_link + query
 
-        response = self.get(url)
+        response = self._get(url)
         result = self._get_and_parse_result_list(response)
 
-        return {'search': title, 'data': result}
-
-    def get(self, url):
-        return self.__conn_request('GET', url)
+        return result
 
     def search_serie_season(self, serie_name, season, paginator_index=0):
         """ Search the entire season of a TV Show """
@@ -72,7 +69,10 @@ class ThePirateBayApi(object):
             episodes_list.append(results[0])
             episode += 1
 
-        return {'search_title': serie_name, 'data': episodes_list}
+        return episodes_list
+
+    def _get(self, url):
+        return self.__conn_request('GET', url)
 
     @staticmethod
     def _get_and_parse_result_list(response):

@@ -1,10 +1,63 @@
 # -*- encode: utf-8 -*-
 import urllib
-
 import re
-from core.api import ThePirateBayApi
-
 from django.views.generic import TemplateView
+from django.contrib.auth.models import User
+
+from rest_framework import viewsets, filters, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from core.api import ThePirateBayApi
+from core.serializers import UserSerializer, SearchSerializer
+
+TPB = ThePirateBayApi()
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_fields = ('id', 'username', 'first_name', 'email', 'is_staff', 'is_superuser')
+
+
+class Result(object):
+    def __init__(self, title, result):
+        self.title = title
+        self.result = result
+
+
+class SearchView(APIView):
+    """
+    View used to search series over ThePirateBayApi.
+    E.g of search general: /api/search?title
+    """
+
+    def get(self, request):
+        # validate if has a title to search
+        if not request.query_params.get('title'):
+            return Response(status=status.HTTP_200_OK)
+
+        if request.query_params.get('season'):
+            result_list = self.get_season()
+        else:
+            result_list = self.get_general()
+
+        result = Result(request.query_params.get('title'), result_list)
+        serializer = SearchSerializer(result)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def get_season(self):
+        try:
+            season = int(self.request.query_params.get('season'))
+        except ValueError:
+            raise ValueError('No valid season was specified on the search.')
+
+        return TPB.search_serie_season(self.request.query_params.get('title'), season=season)
+
+    def get_general(self):
+        return TPB.search(self.request.query_params.get('title'))
 
 
 class HomeView(TemplateView):
@@ -98,8 +151,7 @@ class HomeView(TemplateView):
 #
 #         return render_template('home_search_result.html', context=results)
 
-#
-#
+
 # class AddTorrent(MethodView):
 #     def get(self):
 #         # torrent = Torrent(session=LIBTORRENT_SESSION, magnet_link=request.args.get('magnet_link'))
