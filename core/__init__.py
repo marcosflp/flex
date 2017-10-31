@@ -1,115 +1,54 @@
 # -*- coding: utf-8 -*-
+
 import libtorrent
-import os
-import re
 from django.conf import settings
+
+default_app_config = 'core.apps.CoreConfig'
 
 
 class Session(libtorrent.session):
-    # FIXME: Add _ or __ before the methods that are only used internally
 
-    def __init__(self, download_root_path):
-        super(Session, self).__init__()
+    def __init__(self, **kwargs):
+        super(Session, self).__init__(**kwargs)
 
         self.pool = {}
         self.listen_on(6881, 6891)
-        self.download_root_path = download_root_path
+        self.download_root_path = settings.ROOT_DOWNLOAD_FOLDER
 
     def __unicode__(self):
         return "Session that handler torrents download"
 
-    def add_magnet_uri(self, torrent_title, uri=None, season_uri_list=None):
-        """ Add torrents in the TorrentPool and starts downloading it """
+    def add(self, torrent):
+        """ Add torrents and starts downloading it """
+        from core.models import Torrent
+        assert isinstance(torrent, Torrent)
+
         params = {
-            'save_path': self.get_save_path(torrent_title),
+            'save_path': torrent.path,
             'storage_mode': libtorrent.storage_mode_t.storage_mode_sparse
         }
+        torrent_handler = libtorrent.add_magnet_uri(self, torrent.magnet_link, params)
 
-        if uri:
-            torrent_handler = libtorrent.add_magnet_uri(self, uri, params)
-            self.add_to_pool(torrent_handler)
-
-        elif season_uri_list:
-            for uri in season_uri_list:
-                torrent_handler = libtorrent.add_magnet_uri(self, uri, params)
-                self.add_to_pool(torrent_handler)
+        self.pool[torrent.pk] = torrent_handler
 
         return None
 
-    def get_save_path(self, torrent_title):
-        """ Return the absolute path to save this torrent """
-        word_list = []
-
-        if len(torrent_title.split(' ')) > 2:
-            word_list = torrent_title.split(' ')
-        elif len(torrent_title.split('.')) > 2:
-            word_list = torrent_title.split('.')
-        else:
-            return os.path.join(settings.ROOT_DOWNLOAD_FOLDER, torrent_title)
-
-        # Generate path_name
-        name_list = []
-        if self.is_serie(torrent_title):
-            for word in word_list:
-                if re.search(r'S[0-9]{2}E[0-9]{2}', word, re.I):
-                    name_list.append(word)
-                    break
-                else:
-                    name_list.append(word)
-        else:
-            name_list = word_list
-
-        path_name = '.'.join(map(lambda _word: str(_word).lower(), name_list))
-
-        return os.path.join(settings.ROOT_DOWNLOAD_FOLDER, path_name)
-
-    @staticmethod
-    def is_serie(torrent_title):
-        """ Check if the title is from a tv serie show """
-        if re.search(r'S[0-9]{2}E[0-9]{2}', torrent_title, re.I):
-            return True
-        else:
-            return False
-
-    def add_to_pool(self, torrent_handler):
-        """ Add a torent_handler to the pool """
-        self.pool[str(len(self.pool.keys())+1)] = torrent_handler
-
-        return None
-
-    def remove(self, index):
+    def remove(self, torrent):
         """ Remove a torrent from the self.pool """
-        if isinstance(index, int):
-            index = str(index)
+        from core.models import Torrent
 
-        torrent_removed = self.pool.pop(index)
+        assert isinstance(torrent, Torrent)
+        assert torrent.pk in self.pool.keys()
 
-        # reindex
-        values = self.pool.values()
-        self.pool = {}
-        for x in range(len(values)):
-            self.pool[str(x+1)] = values[x]
-
+        del self.pool[torrent.pk]
         return None
 
-    def status_of_torrents(self):
-        """ Return the state of all torrents on the session """
-        state = ['queued', 'checking', 'downloading metadata', 'downloading', 'finished', 'seeding', 'allocating', '?']
-        t_list = []
+    def load_torrents(self):
+        from core.models import Torrent
 
-        for t in self.pool.itervalues():
-            t_status = t.status()
+        # Load Torrents
+        torrents = Torrent.objects.all()
+        for torrent in torrents:
+            self.add(torrent)
 
-            if t_status.has_metadata:
-                t_title = t.get_torrent_info().name()
-            else:
-                t_title = "-----"
-
-            t_list.append([t_title,
-                           t_status.progress * 100,
-                           t_status.download_rate / 1000,
-                           t_status.upload_rate / 1000,
-                           t_status.num_peers,
-                           state[t_status.state]])
-
-        return t_list
+TorrentSession = Session()

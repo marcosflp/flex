@@ -1,20 +1,42 @@
 # -*- coding: utf-8 -*-
 from rest_framework import serializers
-from django.contrib.auth.models import User
+
+from core import TorrentSession
+from core.models import Torrent
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class TorrentSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
+
     class Meta:
-        model = User
-        fields = ('id', 'username', 'first_name', 'email', 'is_staff', 'is_superuser')
-
-
-class SearchSerializer(serializers.Serializer):
-    title = serializers.CharField(max_length=200)
-    result = serializers.ListField()
-
-    def update(self, instance, validated_data):
-        pass
+        model = Torrent
+        fields = '__all__'
+        read_only_fields = ('path', 'status')
 
     def create(self, validated_data):
-        pass
+        return Torrent.create(**validated_data)
+
+    @staticmethod
+    def get_status(obj):
+        """ Returns the status of each Torrent """
+
+        state_list = ['queued', 'checking', 'downloading metadata', 'downloading', 'finished', 'seeding', 'allocating',
+                      '?']
+
+        torrent = TorrentSession.pool[obj.pk]
+        torrent_status = torrent.status()
+
+        if torrent_status.has_metadata:
+            t_title = torrent.get_torrent_info().name()
+        else:
+            t_title = "-----"
+
+        return {'episode': t_title,
+                'complete_percent': torrent_status.progress * 100,
+                'download': torrent_status.download_rate / 1000,
+                'up': torrent_status.upload_rate / 1000,
+                'peers': torrent_status.num_peers,
+                'state': state_list[torrent_status.state],
+                'completed_time': torrent_status.completed_time,
+                'paused': torrent_status.paused,
+                'sequential_download': torrent_status.sequential_download}
