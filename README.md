@@ -15,7 +15,7 @@ $ cd /tmp/
 $ wget https://github.com/arvidn/libtorrent/releases/download/libtorrent-1_1_3/libtorrent-rasterbar-1.1.3.tar.gz
 $ tar xzf libtorrent-rasterbar-1.1.3.tar.gz
 $ cd libtorrent-rasterbar-1.1.3/
-$ ./configure --enable-debug=yes --with-boost-python=lib --enable-python-binding
+$ ./configure --disable-debug --disable-dependency-tracking --disable-silent-rules --enable-encryption --prefix=$VIRTUAL_ENV --with-boost-python --enable-dht --with-libiconv --with-boost-libdir=/usr/lib/x86_64-linux-gnu/ --enable-python-binding PYTHON=python
 $ python setup.py build
 $ python setup.py install
 ```
