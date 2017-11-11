@@ -1,0 +1,15 @@
+[settings]
+
+# Security
+DEBUG=True
+SECRET_KEY=4cn68iga94@**2x9vb1f*-104pe%%*-u-%%#%%1wh!r(+mjiza@y$
+
+# Database
+DATABASE_ENGINE=django.db.backends.postgresql_psycopg2
+DATABASE_HOST=localhost
+DATABASE_NAME=neoapidb
+DATABASE_USER=mylocaluser
+DATABASE_PASSWORD=mylocalpasswd
+
+# Logging
+ENABLE_LOGGING=True
