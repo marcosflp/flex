@@ -11,17 +11,19 @@ class Torrent(models.Model):
     Torrent model
     """
     TYPE_MOVIE = 'movie'
-    TYPE_SERIE = 'serie'
+    TYPE_TVSHOW = 'tvshow'
     TYPE_DOCUMENTARY = 'documentary'
     TYPE_CHOICES = (
         (TYPE_MOVIE, 'Movie'),
-        (TYPE_SERIE, 'Serie'),
+        (TYPE_TVSHOW, 'Tv Show'),
         (TYPE_DOCUMENTARY, 'Documentary')
     )
 
     name = models.CharField(max_length=64, unique=True)
     type = models.CharField(max_length=16, choices=TYPE_CHOICES)
-    themoviedb_url = models.URLField(unique=True)
+
+    themoviedb_movie_id = models.PositiveIntegerField(unique=True, null=True, blank=True)
+    themoviedb_tvshow_id = models.PositiveIntegerField(unique=True, null=True, blank=True)
 
     magnet_link = models.CharField(max_length=1024, unique=True)
     size = models.CharField(max_length=16, null=True, blank=True, default='', help_text='E.g: 100mb')

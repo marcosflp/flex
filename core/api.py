@@ -81,7 +81,7 @@ class ThePirateBayApi(object):
 
             valid_data = {'position': len(torrent_list) + 1}
 
-            if torrent_info.get('name', None) is not None:
+            if torrent_info.get('name'):
                 valid_data['name'] = torrent_info['name'][0]
 
             if torrent_info.get('size'):
