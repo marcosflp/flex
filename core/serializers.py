@@ -19,7 +19,7 @@ class TorrentSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_status(obj):
         """ Returns the status of each Torrent """
-        if not hasattr(TorrentSession, 'poll'):
+        if not hasattr(TorrentSession, 'pool'):
             # Does not have any torrent downloading
             return 'No torrent downloading'
 

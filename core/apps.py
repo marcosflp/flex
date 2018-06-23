@@ -9,9 +9,8 @@ class CoreConfig(AppConfig):
 
     def ready(self):
         # Load all torrents
-        # try:
-        #     TorrentSession.load_torrents()
-        # except OperationalError:
-        #     # raises when there is not table created
-        #     pass
-        pass
+        try:
+            TorrentSession.load_torrents()
+        except OperationalError:
+            # raises when there is not table created
+            pass

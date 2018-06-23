@@ -217,4 +217,5 @@ ENV/
 secret.py
 settings.ini
 static/
+.idea
 

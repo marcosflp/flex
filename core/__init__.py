@@ -28,6 +28,7 @@ class Session(libtorrent.session):
             'storage_mode': libtorrent.storage_mode_t.storage_mode_sparse
         }
         torrent_handler = libtorrent.add_magnet_uri(self, torrent.magnet_link, params)
+        torrent_handler.set_sequential_download(True)
 
         self.pool[torrent.pk] = torrent_handler
 
@@ -38,9 +39,10 @@ class Session(libtorrent.session):
         from core.models import Torrent
 
         assert isinstance(torrent, Torrent)
-        assert torrent.pk in self.pool.keys()
 
-        del self.pool[torrent.pk]
+        if self.pool.get(torrent.pk):
+            del self.pool[torrent.pk]
+
         return None
 
     def load_torrents(self):
@@ -50,5 +52,7 @@ class Session(libtorrent.session):
         torrents = Torrent.objects.all()
         for torrent in torrents:
             self.add(torrent)
+
+        print(self.pool)
 
 TorrentSession = Session()

@@ -33,13 +33,18 @@ class Torrent(models.Model):
         return '{}: {} {}'.format(self.pk, self.name, self.size)
 
     @classmethod
-    def create(cls, name, type, themoviedb_url, magnet_link, size):
+    def create(cls,
+               name,
+               type,
+               magnet_link,
+               size,
+               themoviedb_tvshow_id,
+               themoviedb_movie_id):
         """
         Create action
 
         :param name: (string) Name of the cine
         :param type: (string) define whether the cine is a serie, movie or documentary
-        :param themoviedb_url: (string) the detail page of the cine in the themoviedb.org
         :param magnet_link: (string) link to download the torrent
         :param size: (string) size of the torrent
 
@@ -55,10 +60,11 @@ class Torrent(models.Model):
         # create
         torrent = cls.objects.create(name=name,
                                      type=type,
-                                     themoviedb_url=themoviedb_url,
                                      magnet_link=magnet_link,
                                      size=size,
-                                     path=path)
+                                     path=path,
+                                     themoviedb_tvshow_id=themoviedb_tvshow_id,
+                                     themoviedb_movie_id=themoviedb_movie_id)
 
         # add to be downloaded
         TorrentSession.add(torrent)
@@ -66,4 +72,5 @@ class Torrent(models.Model):
         return torrent
 
     def delete(self, using=None, keep_parents=False):
-        TorrentSession.remove(self.pk)
+        TorrentSession.remove(self)
+        super(Torrent, self).delete(using, keep_parents)
